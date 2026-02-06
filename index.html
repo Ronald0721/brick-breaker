@@ -2,47 +2,56 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Brick Breaker</title>
     <style>
+        /* Reset and base styles */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            touch-action: manipulation;
             -webkit-tap-highlight-color: transparent;
         }
         
-        body {
-            margin: 0;
-            padding: 0;
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            position: fixed; /* Prevents scrolling on mobile */
             background: #f5f5f5;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        body {
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            overflow: hidden;
-            width: 100vw;
-            height: 100vh;
+            touch-action: manipulation;
         }
         
+        /* Game container - FIXED POSITIONING */
         .game-container {
             position: relative;
-            width: 100vw;
-            height: 100vh;
+            width: 100%;
+            height: 100%;
             max-width: 500px;
-            margin: 0 auto;
-            overflow: hidden;
+            max-height: 800px;
             background: white;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
         }
         
+        /* Canvas - FIXED DIMENSIONS */
         #gameCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
             display: block;
         }
         
+        /* Start screen */
         .start-screen {
             position: absolute;
             top: 0;
@@ -61,7 +70,7 @@
         
         .game-title {
             color: #333;
-            font-size: 28px;
+            font-size: clamp(24px, 5vw, 28px);
             margin-bottom: 20px;
             font-weight: 600;
         }
@@ -77,13 +86,18 @@
             margin-top: 10px;
             font-weight: 500;
             transition: all 0.3s;
+            min-width: 200px;
         }
         
         .start-btn:hover {
             background: #555;
-            transform: translateY(-2px);
         }
         
+        .start-btn:active {
+            transform: scale(0.98);
+        }
+        
+        /* Game info */
         .game-info {
             position: absolute;
             top: 10px;
@@ -92,17 +106,33 @@
             display: flex;
             justify-content: space-around;
             color: #333;
-            font-size: 16px;
+            font-size: 14px;
             z-index: 10;
             pointer-events: none;
         }
         
         .info-item {
             background: rgba(255, 255, 255, 0.9);
-            padding: 8px 20px;
-            border-radius: 20px;
+            padding: 8px 15px;
+            border-radius: 15px;
             border: 1px solid #ddd;
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        /* Controls hint */
+        .controls-hint {
+            position: absolute;
+            bottom: 15px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            color: #999;
+            font-size: 14px;
+            z-index: 10;
+            pointer-events: none;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            font-weight: 500;
         }
         
         /* Valentine overlay */
@@ -118,39 +148,41 @@
             align-items: center;
             z-index: 100;
             opacity: 0;
-            transition: opacity 1s ease;
+            transition: opacity 0.5s ease;
         }
         
         .valentine-card {
             background: white;
-            padding: 30px 20px;
+            padding: 25px 20px;
             border-radius: 15px;
             text-align: center;
+            width: 90%;
             max-width: 350px;
-            width: 85%;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
-            transform: translateY(30px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transform: scale(0.9);
             opacity: 0;
-            animation: cardSlideUp 0.8s ease 0.3s forwards;
+            animation: cardPopIn 0.5s ease 0.2s forwards;
             position: relative;
             overflow: hidden;
             border: 3px solid #ff6b8b;
+            margin: 20px;
         }
         
-        @keyframes cardSlideUp {
+        @keyframes cardPopIn {
             to {
-                transform: translateY(0);
+                transform: scale(1);
                 opacity: 1;
             }
         }
         
         .card-image {
-            width: 150px;
-            height: 150px;
+            width: 140px;
+            height: 140px;
             margin: 0 auto 20px;
             border-radius: 50%;
             overflow: hidden;
             border: 3px solid #ff6b8b;
+            background: #fff;
         }
         
         .card-image img {
@@ -161,12 +193,12 @@
         
         .question {
             color: #ff4444;
-            font-size: 24px;
+            font-size: 26px;
             font-weight: 600;
             font-family: 'Brush Script MT', cursive;
-            letter-spacing: 1px;
-            line-height: 1.4;
-            padding: 15px 0;
+            line-height: 1.2;
+            padding: 10px 0;
+            text-align: center;
         }
         
         /* Heart particles */
@@ -201,23 +233,13 @@
             left: 10px;
         }
         
-        /* Controls hint */
-        .controls-hint {
-            position: absolute;
-            bottom: 15px;
-            left: 0;
-            width: 100%;
-            text-align: center;
-            color: #999;
-            font-size: 14px;
-            z-index: 10;
-            pointer-events: none;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 8px;
-        }
-        
-        /* Mobile optimization */
+        /* Mobile optimizations */
         @media (max-width: 500px) {
+            .game-container {
+                max-width: 100%;
+                max-height: 100%;
+            }
+            
             .game-title {
                 font-size: 24px;
             }
@@ -225,19 +247,12 @@
             .start-btn {
                 padding: 12px 30px;
                 font-size: 16px;
-            }
-            
-            .game-info {
-                top: 5px;
+                min-width: 180px;
             }
             
             .info-item {
-                padding: 6px 15px;
-                font-size: 14px;
-            }
-            
-            .valentine-card {
-                padding: 25px 15px;
+                padding: 6px 12px;
+                font-size: 13px;
             }
             
             .card-image {
@@ -246,29 +261,23 @@
             }
             
             .question {
-                font-size: 22px;
+                font-size: 24px;
             }
             
             .controls-hint {
                 font-size: 13px;
-                bottom: 10px;
+                padding: 8px;
             }
         }
         
-        /* For very small screens */
-        @media (max-height: 600px) {
+        /* For tall screens */
+        @media (max-height: 700px) {
             .game-title {
-                font-size: 22px;
                 margin-bottom: 10px;
             }
             
             .start-btn {
-                padding: 10px 25px;
-                font-size: 14px;
-            }
-            
-            .valentine-card {
-                padding: 20px 15px;
+                margin-top: 5px;
             }
             
             .card-image {
@@ -278,13 +287,36 @@
             }
             
             .question {
-                font-size: 20px;
+                font-size: 22px;
+            }
+        }
+        
+        /* For very small screens */
+        @media (max-height: 500px) {
+            .game-info {
+                top: 5px;
+            }
+            
+            .controls-hint {
+                bottom: 5px;
+                padding: 5px;
+                font-size: 12px;
+            }
+        }
+        
+        /* Fix for iPhone notch */
+        @supports (padding: max(0px)) {
+            .game-container {
+                padding-left: env(safe-area-inset-left);
+                padding-right: env(safe-area-inset-right);
+                padding-top: env(safe-area-inset-top);
+                padding-bottom: env(safe-area-inset-bottom);
             }
         }
     </style>
 </head>
 <body>
-    <div class="game-container">
+    <div class="game-container" id="gameContainer">
         <canvas id="gameCanvas"></canvas>
         
         <div class="game-info">
@@ -304,7 +336,10 @@
         <div class="valentine-overlay" id="valentineOverlay">
             <div class="valentine-card">
                 <div class="card-image">
-                    <img src="images/qt_cat.gif" alt="Cute cat" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgZmlsbD0iI2ZmNmI4YiIvPjx0ZXh0IHg9IjYwIiB5PSI2MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE0IiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPjPCoDwvdGV4dD48L3N2Zz4='" />
+                    <!-- Replace with your GIF URL or keep local -->
+                    <img src="https://i.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif" 
+                         alt="Romantic hearts"
+                         onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgZmlsbD0iI2ZmNmI4YiIvPjx0ZXh0IHg9IjYwIiB5PSI2MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE0IiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPjPCoDwvdGV4dD48L3N2Zz4='">
                 </div>
                 <div class="question">
                     Will you be my Valentine?
@@ -317,46 +352,23 @@
         // Canvas setup
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
+        const gameContainer = document.getElementById('gameContainer');
         
-        // Set canvas to full container size
+        // Set canvas to exact container size
         function resizeCanvas() {
-            const container = document.querySelector('.game-container');
-            canvas.width = container.clientWidth;
-            canvas.height = container.clientHeight;
+            const containerWidth = gameContainer.clientWidth;
+            const containerHeight = gameContainer.clientHeight;
             
-            // Update game elements if game is running
+            // Set canvas dimensions
+            canvas.width = containerWidth;
+            canvas.height = containerHeight;
+            
+            // Update game sizes if running
             if (gameRunning) {
                 updateGameSizes();
+            } else {
+                initGame();
             }
-        }
-        
-        // Update game element sizes after resize
-        function updateGameSizes() {
-            ballRadius = Math.max(8, canvas.width * 0.02);
-            paddleHeight = ballRadius * 1.5;
-            paddleWidth = canvas.width * 0.25; // Larger paddle for mobile
-            
-            // Recalculate block sizes
-            blockWidth = (canvas.width - 40) / blockCols - blockPadding;
-            blockHeight = Math.min(25, blockWidth * 0.5);
-            
-            // Update block positions
-            for (let r = 0; r < blockRows; r++) {
-                for (let c = 0; c < blockCols; c++) {
-                    if (blocks[r] && blocks[r][c]) {
-                        blocks[r][c].x = c * (blockWidth + blockPadding) + 20;
-                        blocks[r][c].y = r * (blockHeight + blockPadding) + blockOffsetTop;
-                        blocks[r][c].width = blockWidth;
-                        blocks[r][c].height = blockHeight;
-                    }
-                }
-            }
-            
-            // Ensure paddle is within bounds
-            paddleX = Math.min(Math.max(0, paddleX), canvas.width - paddleWidth);
-            paddleY = canvas.height - paddleHeight - 30;
-            
-            draw();
         }
         
         // Game state
@@ -364,29 +376,26 @@
         let score = 0;
         let blocksLeft = 20;
         
-        // Ball properties
-        let ballRadius = 10;
+        // Game elements
+        let ballRadius;
         let ballX, ballY;
         let ballSpeedX = 3;
         let ballSpeedY = -3;
         
-        // Paddle properties
-        let paddleHeight = 15;
-        let paddleWidth = 100;
+        let paddleHeight;
+        let paddleWidth;
         let paddleX, paddleY;
         
-        // Blocks
         let blockRows = 4;
         let blockCols = 5;
         let blockWidth, blockHeight;
         let blockPadding = 3;
-        let blockOffsetTop = 80;
+        let blockOffsetTop = 70;
         let blocks = [];
         
         // Touch tracking
-        let touchStartX = 0;
-        let paddleStartX = 0;
         let isTouching = false;
+        let lastTouchX = 0;
         
         // DOM elements
         const blocksLeftEl = document.getElementById('blocksLeft');
@@ -398,25 +407,21 @@
         
         // Initialize game
         function initGame() {
-            resizeCanvas();
+            // Set sizes based on canvas
+            ballRadius = Math.max(8, canvas.width * 0.02);
+            paddleHeight = ballRadius * 1.5;
+            paddleWidth = canvas.width * 0.25;
             
             // Initialize positions
-            paddleWidth = canvas.width * 0.25;
-            paddleHeight = 15;
             paddleX = (canvas.width - paddleWidth) / 2;
             paddleY = canvas.height - paddleHeight - 30;
             
-            ballRadius = Math.max(8, canvas.width * 0.02);
             ballX = canvas.width / 2;
             ballY = canvas.height - paddleHeight - 40;
             
-            // Slower speed for mobile
-            ballSpeedX = 2.5;
-            ballSpeedY = -2.5;
-            
             // Initialize blocks
             blockWidth = (canvas.width - 40) / blockCols - blockPadding;
-            blockHeight = Math.min(25, blockWidth * 0.5);
+            blockHeight = Math.min(22, blockWidth * 0.5);
             
             blocks = [];
             const blockColors = ['#333', '#555', '#777', '#999', '#bbb', '#ddd'];
@@ -443,7 +448,36 @@
             draw();
         }
         
-        // Draw red ball
+        // Update game sizes after resize
+        function updateGameSizes() {
+            ballRadius = Math.max(8, canvas.width * 0.02);
+            paddleHeight = ballRadius * 1.5;
+            paddleWidth = canvas.width * 0.25;
+            
+            // Recalculate block sizes
+            blockWidth = (canvas.width - 40) / blockCols - blockPadding;
+            blockHeight = Math.min(22, blockWidth * 0.5);
+            
+            // Update block positions
+            for (let r = 0; r < blockRows; r++) {
+                for (let c = 0; c < blockCols; c++) {
+                    if (blocks[r] && blocks[r][c]) {
+                        blocks[r][c].x = c * (blockWidth + blockPadding) + 20;
+                        blocks[r][c].y = r * (blockHeight + blockPadding) + blockOffsetTop;
+                        blocks[r][c].width = blockWidth;
+                        blocks[r][c].height = blockHeight;
+                    }
+                }
+            }
+            
+            // Keep paddle within bounds
+            paddleX = Math.min(Math.max(0, paddleX), canvas.width - paddleWidth);
+            paddleY = canvas.height - paddleHeight - 30;
+            
+            draw();
+        }
+        
+        // Draw functions
         function drawBall() {
             ctx.beginPath();
             ctx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
@@ -459,7 +493,6 @@
             ctx.closePath();
         }
         
-        // Draw black paddle
         function drawPaddle() {
             ctx.beginPath();
             ctx.roundRect(paddleX, paddleY, paddleWidth, paddleHeight, 8);
@@ -475,20 +508,17 @@
             ctx.closePath();
         }
         
-        // Draw blocks
         function drawBlocks() {
             for (let r = 0; r < blockRows; r++) {
                 for (let c = 0; c < blockCols; c++) {
                     const block = blocks[r][c];
                     if (block.active) {
-                        // Block
                         ctx.beginPath();
                         ctx.roundRect(block.x, block.y, block.width, block.height, 4);
                         ctx.fillStyle = block.color;
                         ctx.fill();
                         ctx.closePath();
                         
-                        // Block border
                         ctx.beginPath();
                         ctx.roundRect(block.x, block.y, block.width, block.height, 4);
                         ctx.strokeStyle = '#ddd';
@@ -500,24 +530,26 @@
             }
         }
         
-        // Draw everything
         function draw() {
             // Clear with white
             ctx.fillStyle = '#fff';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // Draw subtle grid for visual reference
+            // Draw subtle background grid
             ctx.strokeStyle = 'rgba(0, 0, 0, 0.05)';
             ctx.lineWidth = 1;
             
-            for (let x = 0; x < canvas.width; x += 50) {
+            // Vertical lines
+            const gridSize = 50;
+            for (let x = gridSize; x < canvas.width; x += gridSize) {
                 ctx.beginPath();
                 ctx.moveTo(x, 0);
                 ctx.lineTo(x, canvas.height);
                 ctx.stroke();
             }
             
-            for (let y = 0; y < canvas.height; y += 50) {
+            // Horizontal lines
+            for (let y = gridSize; y < canvas.height; y += gridSize) {
                 ctx.beginPath();
                 ctx.moveTo(0, y);
                 ctx.lineTo(canvas.width, y);
@@ -546,7 +578,6 @@
                 ballX > paddleX && 
                 ballX < paddleX + paddleWidth) {
                 
-                // Calculate bounce angle based on hit position
                 const hitPos = (ballX - paddleX) / paddleWidth;
                 ballSpeedX = 5 * (hitPos - 0.5);
                 ballSpeedY = -Math.abs(ballSpeedY);
@@ -571,7 +602,6 @@
                         blocksLeftEl.textContent = blocksLeft;
                         scoreEl.textContent = score;
                         
-                        // Check if all blocks are broken
                         if (blocksLeft === 0) {
                             gameComplete();
                             return;
@@ -590,7 +620,6 @@
         function update() {
             if (!gameRunning) return;
             
-            // Move ball
             ballX += ballSpeedX;
             ballY += ballSpeedY;
             
@@ -624,7 +653,6 @@
         function gameOver() {
             gameRunning = false;
             
-            // Show controls hint again
             controlsHint.style.opacity = '1';
             
             setTimeout(() => {
@@ -633,14 +661,12 @@
             }, 1000);
         }
         
-        // Game complete - show Valentine's surprise
+        // Game complete
         function gameComplete() {
             gameRunning = false;
             
-            // Hide controls hint
             controlsHint.style.opacity = '0';
             
-            // Wait a moment, then show Valentine's overlay
             setTimeout(() => {
                 valentineOverlay.style.display = 'flex';
                 setTimeout(() => {
@@ -649,7 +675,7 @@
             }, 800);
         }
         
-        // TOUCH CONTROLS - IMPROVED FOR MOBILE
+        // TOUCH CONTROLS - SIMPLIFIED
         canvas.addEventListener('touchstart', (e) => {
             e.preventDefault();
             
@@ -658,11 +684,11 @@
                 return;
             }
             
-            const touch = e.touches[0];
-            touchStartX = touch.clientX;
-            paddleStartX = paddleX;
             isTouching = true;
-        }, { passive: false });
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            lastTouchX = touch.clientX - rect.left;
+        });
         
         canvas.addEventListener('touchmove', (e) => {
             e.preventDefault();
@@ -673,32 +699,34 @@
             const rect = canvas.getBoundingClientRect();
             const touchX = touch.clientX - rect.left;
             
-            // Move paddle to touch position (centered)
-            paddleX = touchX - (paddleWidth / 2);
+            // Calculate movement
+            const deltaX = touchX - lastTouchX;
+            paddleX += deltaX * 1.5; // Add multiplier for sensitivity
             
             // Keep paddle within bounds
             if (paddleX < 0) paddleX = 0;
             if (paddleX + paddleWidth > canvas.width) {
                 paddleX = canvas.width - paddleWidth;
             }
-        }, { passive: false });
+            
+            lastTouchX = touchX;
+        });
         
         canvas.addEventListener('touchend', (e) => {
             e.preventDefault();
             isTouching = false;
-        }, { passive: false });
+        });
         
-        // MOUSE CONTROLS for desktop
+        // MOUSE CONTROLS
         canvas.addEventListener('mousedown', (e) => {
             if (!gameRunning) {
                 startGame();
                 return;
             }
             
-            const rect = canvas.getBoundingClientRect();
-            touchStartX = e.clientX - rect.left;
-            paddleStartX = paddleX;
             isTouching = true;
+            const rect = canvas.getBoundingClientRect();
+            lastTouchX = e.clientX - rect.left;
         });
         
         canvas.addEventListener('mousemove', (e) => {
@@ -707,13 +735,15 @@
             const rect = canvas.getBoundingClientRect();
             const mouseX = e.clientX - rect.left;
             
-            // Move paddle to mouse position (centered)
-            paddleX = mouseX - (paddleWidth / 2);
+            const deltaX = mouseX - lastTouchX;
+            paddleX += deltaX;
             
             if (paddleX < 0) paddleX = 0;
             if (paddleX + paddleWidth > canvas.width) {
                 paddleX = canvas.width - paddleWidth;
             }
+            
+            lastTouchX = mouseX;
         });
         
         canvas.addEventListener('mouseup', () => {
@@ -724,25 +754,24 @@
             isTouching = false;
         });
         
-        // KEYBOARD CONTROLS for desktop
+        // KEYBOARD CONTROLS
         document.addEventListener('keydown', (e) => {
             if (!gameRunning) return;
             
-            const moveAmount = 20;
-            if (e.key === 'ArrowLeft' || e.key === 'Left' || e.key === 'a') {
-                paddleX = Math.max(0, paddleX - moveAmount);
-            } else if (e.key === 'ArrowRight' || e.key === 'Right' || e.key === 'd') {
-                paddleX = Math.min(canvas.width - paddleWidth, paddleX + moveAmount);
+            if (e.key === 'ArrowLeft' || e.key === 'a') {
+                paddleX = Math.max(0, paddleX - 20);
+            } else if (e.key === 'ArrowRight' || e.key === 'd') {
+                paddleX = Math.min(canvas.width - paddleWidth, paddleX + 20);
             }
         });
         
         // Event Listeners
         startBtn.addEventListener('click', startGame);
         
-        // Handle window resize
+        // Handle resize and orientation change
         window.addEventListener('resize', resizeCanvas);
         window.addEventListener('orientationchange', () => {
-            setTimeout(resizeCanvas, 100);
+            setTimeout(resizeCanvas, 150);
         });
         
         // Add roundedRect to CanvasRenderingContext2D
@@ -762,7 +791,15 @@
         // Initialize on load
         window.addEventListener('load', () => {
             resizeCanvas();
-            initGame();
+            // Force a resize after a short delay to ensure proper sizing
+            setTimeout(resizeCanvas, 100);
+        });
+        
+        // Also resize when page becomes visible again (for mobile)
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                setTimeout(resizeCanvas, 100);
+            }
         });
     </script>
 </body>
