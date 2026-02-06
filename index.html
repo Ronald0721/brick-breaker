@@ -23,6 +23,9 @@
             min-height: 100vh;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             overflow: hidden;
+            width: 100vw; /* ADD THIS */
+            height: 100vh; /* ADD THIS */
+            position: fixed; /* ADD THIS - CRITICAL */
         }
         
         .game-container {
@@ -720,17 +723,20 @@
             }
             
             const touch = e.touches[0];
-            touchStartX = touch.clientX;
+            const rect = canvas.getBoundingClientRect(); // ADD THIS
+            touchStartX = touch.clientX - rect.left; // FIX COORDINATES
             paddleStartX = paddleX;
             isTouching = true;
         });
-        
+
         canvas.addEventListener('touchmove', (e) => {
             if (!gameRunning || !isTouching) return;
             
             e.preventDefault();
             const touch = e.touches[0];
-            const deltaX = touch.clientX - touchStartX;
+            const rect = canvas.getBoundingClientRect(); // ADD THIS
+            const currentX = touch.clientX - rect.left; // FIX COORDINATES
+            const deltaX = currentX - touchStartX;
             
             paddleX = paddleStartX + deltaX;
             
@@ -739,42 +745,47 @@
                 paddleX = canvas.width - paddleWidth;
             }
         });
-        
-        canvas.addEventListener('touchend', () => {
+
+        canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
             isTouching = false;
         });
         
         // Mouse controls
         canvas.addEventListener('mousedown', (e) => {
-            if (!gameRunning) {
-                startGame();
-                return;
-            }
-            
-            touchStartX = e.clientX;
-            paddleStartX = paddleX;
-            isTouching = true;
-        });
-        
-        canvas.addEventListener('mousemove', (e) => {
-            if (!gameRunning || !isTouching) return;
-            
-            const deltaX = e.clientX - touchStartX;
-            paddleX = paddleStartX + deltaX;
-            
-            if (paddleX < 0) paddleX = 0;
-            if (paddleX + paddleWidth > canvas.width) {
-                paddleX = canvas.width - paddleWidth;
-            }
-        });
-        
-        canvas.addEventListener('mouseup', () => {
-            isTouching = false;
-        });
-        
-        canvas.addEventListener('mouseleave', () => {
-            isTouching = false;
-        });
+    if (!gameRunning) {
+        startGame();
+        return;
+    }
+    
+    const rect = canvas.getBoundingClientRect(); // ADD THIS
+    touchStartX = e.clientX - rect.left; // FIX COORDINATES
+    paddleStartX = paddleX;
+    isTouching = true;
+});
+
+canvas.addEventListener('mousemove', (e) => {
+    if (!gameRunning || !isTouching) return;
+    
+    const rect = canvas.getBoundingClientRect(); // ADD THIS
+    const currentX = e.clientX - rect.left; // FIX COORDINATES
+    const deltaX = currentX - touchStartX;
+    
+    paddleX = paddleStartX + deltaX;
+    
+    if (paddleX < 0) paddleX = 0;
+    if (paddleX + paddleWidth > canvas.width) {
+        paddleX = canvas.width - paddleWidth;
+    }
+});
+
+canvas.addEventListener('mouseup', () => {
+    isTouching = false;
+});
+
+canvas.addEventListener('mouseleave', () => {
+    isTouching = false;
+});
         
         // Keyboard controls (optional for desktop)
         document.addEventListener('keydown', (e) => {
@@ -829,11 +840,26 @@
             this.closePath();
             return this;
         };
+
+        window.addEventListener('resize', resizeCanvas);
+        window.addEventListener('orientationchange', () => {
+            setTimeout(resizeCanvas, 150);
+        });
+
+        // Force resize when page becomes visible
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                setTimeout(resizeCanvas, 100);
+            }
+        });
         
+        // Initialize on load
         // Initialize on load
         window.addEventListener('load', () => {
             resizeCanvas();
-            initGame();
+            // Force resize for mobile stability
+            setTimeout(resizeCanvas, 100);
+            setTimeout(resizeCanvas, 500); // Double check
         });
         
         // Prevent pull-to-refresh
