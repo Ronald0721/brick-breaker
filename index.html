@@ -5,53 +5,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Brick Breaker</title>
     <style>
-        /* Reset and base styles */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            touch-action: none;
             -webkit-tap-highlight-color: transparent;
         }
         
-        html, body {
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            position: fixed; /* Prevents scrolling on mobile */
-            background: #f5f5f5;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        }
-        
         body {
+            margin: 0;
+            padding: 0;
+            background: #f5f5f5;
             display: flex;
             justify-content: center;
             align-items: center;
-            touch-action: manipulation;
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            overflow: hidden;
         }
         
-        /* Game container - FIXED POSITIONING */
         .game-container {
             position: relative;
             width: 100%;
-            height: 100%;
+            height: 100vh;
             max-width: 500px;
-            max-height: 800px;
-            background: white;
+            margin: 0 auto;
             overflow: hidden;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
         }
         
-        /* Canvas - FIXED DIMENSIONS */
         #gameCanvas {
-            position: absolute;
-            top: 0;
-            left: 0;
             width: 100%;
             height: 100%;
+            background: #fff;
             display: block;
+            border: 1px solid #ddd;
         }
         
-        /* Start screen */
         .start-screen {
             position: absolute;
             top: 0;
@@ -70,9 +60,17 @@
         
         .game-title {
             color: #333;
-            font-size: clamp(24px, 5vw, 28px);
+            font-size: 28px;
             margin-bottom: 20px;
             font-weight: 600;
+        }
+        
+        .instructions {
+            color: #666;
+            font-size: 16px;
+            margin-bottom: 30px;
+            line-height: 1.6;
+            max-width: 300px;
         }
         
         .start-btn {
@@ -86,122 +84,105 @@
             margin-top: 10px;
             font-weight: 500;
             transition: all 0.3s;
-            min-width: 200px;
         }
         
         .start-btn:hover {
             background: #555;
+            transform: translateY(-2px);
         }
         
-        .start-btn:active {
-            transform: scale(0.98);
-        }
-        
-        /* Game info */
         .game-info {
             position: absolute;
-            top: 10px;
+            top: 20px;
             left: 0;
             width: 100%;
             display: flex;
             justify-content: space-around;
             color: #333;
-            font-size: 14px;
+            font-size: 16px;
             z-index: 10;
             pointer-events: none;
         }
         
         .info-item {
             background: rgba(255, 255, 255, 0.9);
-            padding: 8px 15px;
-            border-radius: 15px;
+            padding: 8px 20px;
+            border-radius: 20px;
             border: 1px solid #ddd;
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
         
-        /* Controls hint */
-        .controls-hint {
-            position: absolute;
-            bottom: 15px;
-            left: 0;
-            width: 100%;
-            text-align: center;
-            color: #999;
-            font-size: 14px;
-            z-index: 10;
-            pointer-events: none;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 10px;
-            font-weight: 500;
-        }
-        
-        /* Valentine overlay */
+        /* Valentine overlay - MORE COLORFUL */
         .valentine-overlay {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, rgba(255, 182, 193, 0.95), rgba(255, 105, 180, 0.95));
+            /* background: linear-gradient(135deg, rgba(255, 182, 193, 0.95), rgba(255, 105, 180, 0.95)); */
             display: none;
             justify-content: center;
             align-items: center;
             z-index: 100;
             opacity: 0;
-            transition: opacity 0.5s ease;
+            transition: opacity 1s ease;
         }
         
         .valentine-card {
             background: white;
-            padding: 25px 20px;
-            border-radius: 15px;
+            padding: 40px 30px;
+            border-radius: 20px;
             text-align: center;
-            width: 90%;
             max-width: 350px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            transform: scale(0.9);
+            width: 90%;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            transform: translateY(30px);
             opacity: 0;
-            animation: cardPopIn 0.5s ease 0.2s forwards;
+            animation: cardSlideUp 0.8s ease 0.3s forwards;
             position: relative;
             overflow: hidden;
             border: 3px solid #ff6b8b;
-            margin: 20px;
         }
         
-        @keyframes cardPopIn {
+        @keyframes cardSlideUp {
             to {
-                transform: scale(1);
+                transform: translateY(0);
                 opacity: 1;
             }
         }
         
-        .card-image {
-            width: 140px;
-            height: 140px;
-            margin: 0 auto 20px;
-            border-radius: 50%;
-            overflow: hidden;
-            border: 3px solid #ff6b8b;
-            background: #fff;
+        .valentine-title {
+            color: #ff6b8b;
+            font-size: 24px;
+            margin-bottom: 15px;
+            font-weight: 600;
         }
         
-        .card-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+        .valentine-message {
+            color: #666;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        .valentine-gif {
+            display: block;
+            margin: 0 auto 20px;
+            max-width: 100%;
+            height: auto;
         }
         
         .question {
             color: #ff4444;
-            font-size: 26px;
+            font-size: 20px;
             font-weight: 600;
             font-family: 'Brush Script MT', cursive;
-            line-height: 1.2;
-            padding: 10px 0;
-            text-align: center;
+            letter-spacing: 1px;
+            position: relative;
+            padding: 15px 0;
         }
         
-        /* Heart particles */
+        /* Heart particles - DELAYED */
         .heart {
             position: absolute;
             width: 20px;
@@ -233,90 +214,59 @@
             left: 10px;
         }
         
-        /* Mobile optimizations */
+        /* Controls hint */
+        .controls-hint {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            color: #999;
+            font-size: 14px;
+            z-index: 10;
+            pointer-events: none;
+        }
+        
+        /* Decorative hearts on card */
+        .card-heart {
+            position: absolute;
+            color: #ffb6c1;
+            font-size: 30px;
+            opacity: 0.3;
+            z-index: -1;
+        }
+        
+        .card-heart:nth-child(1) { top: 10px; left: 10px; }
+        .card-heart:nth-child(2) { top: 10px; right: 10px; }
+        .card-heart:nth-child(3) { bottom: 10px; left: 10px; }
+        .card-heart:nth-child(4) { bottom: 10px; right: 10px; }
+        
         @media (max-width: 500px) {
-            .game-container {
-                max-width: 100%;
-                max-height: 100%;
-            }
-            
             .game-title {
                 font-size: 24px;
             }
             
-            .start-btn {
-                padding: 12px 30px;
-                font-size: 16px;
-                min-width: 180px;
+            .instructions {
+                font-size: 14px;
             }
             
-            .info-item {
-                padding: 6px 12px;
-                font-size: 13px;
-            }
-            
-            .card-image {
-                width: 120px;
-                height: 120px;
+            .valentine-card {
+                padding: 30px 20px;
             }
             
             .question {
-                font-size: 24px;
+                font-size: 25px;
             }
             
-            .controls-hint {
-                font-size: 13px;
-                padding: 8px;
-            }
-        }
-        
-        /* For tall screens */
-        @media (max-height: 700px) {
-            .game-title {
-                margin-bottom: 10px;
-            }
-            
-            .start-btn {
-                margin-top: 5px;
-            }
-            
-            .card-image {
-                width: 100px;
-                height: 100px;
-                margin-bottom: 15px;
-            }
-            
-            .question {
-                font-size: 22px;
-            }
-        }
-        
-        /* For very small screens */
-        @media (max-height: 500px) {
-            .game-info {
-                top: 5px;
-            }
-            
-            .controls-hint {
-                bottom: 5px;
-                padding: 5px;
-                font-size: 12px;
-            }
-        }
-        
-        /* Fix for iPhone notch */
-        @supports (padding: max(0px)) {
-            .game-container {
-                padding-left: env(safe-area-inset-left);
-                padding-right: env(safe-area-inset-right);
-                padding-top: env(safe-area-inset-top);
-                padding-bottom: env(safe-area-inset-bottom);
+            .question::before,
+            .question::after {
+                display: none;
             }
         }
     </style>
 </head>
 <body>
-    <div class="game-container" id="gameContainer">
+    <div class="game-container">
         <canvas id="gameCanvas"></canvas>
         
         <div class="game-info">
@@ -335,12 +285,7 @@
         
         <div class="valentine-overlay" id="valentineOverlay">
             <div class="valentine-card">
-                <div class="card-image">
-                    <!-- Replace with your GIF URL or keep local -->
-                    <img src="https://i.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif" 
-                         alt="Romantic hearts"
-                         onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgZmlsbD0iI2ZmNmI4YiIvPjx0ZXh0IHg9IjYwIiB5PSI2MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE0IiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPjPCoDwvdGV4dD48L3N2Zz4='">
-                </div>
+                <img src="images/qt_cat.gif" alt="Funny cat" class="valentine-gif" />
                 <div class="question">
                     Will you be my Valentine?
                 </div>
@@ -352,50 +297,45 @@
         // Canvas setup
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        const gameContainer = document.getElementById('gameContainer');
         
-        // Set canvas to exact container size
+        // Set canvas size (fixed aspect ratio)
         function resizeCanvas() {
-            const containerWidth = gameContainer.clientWidth;
-            const containerHeight = gameContainer.clientHeight;
-            
-            // Set canvas dimensions
-            canvas.width = containerWidth;
-            canvas.height = containerHeight;
-            
-            // Update game sizes if running
-            if (gameRunning) {
-                updateGameSizes();
-            } else {
-                initGame();
-            }
+            const container = document.querySelector('.game-container');
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
         }
         
         // Game state
         let gameRunning = false;
         let score = 0;
-        let blocksLeft = 20;
+        let blocksLeft = 20; // Increased to 20 blocks (4x5 grid)
         
-        // Game elements
+        // Ball properties - Still beginner friendly
         let ballRadius;
         let ballX, ballY;
-        let ballSpeedX = 3;
-        let ballSpeedY = -3;
+        let ballSpeedX, ballSpeedY;
         
+        // Paddle properties
         let paddleHeight;
         let paddleWidth;
         let paddleX, paddleY;
         
+        // Blocks - MORE BLOCKS (4x5 grid)
         let blockRows = 4;
         let blockCols = 5;
         let blockWidth, blockHeight;
         let blockPadding = 3;
-        let blockOffsetTop = 70;
+        let blockOffsetTop = 80;
         let blocks = [];
         
         // Touch tracking
+        let touchStartX = 0;
+        let paddleStartX = 0;
         let isTouching = false;
-        let lastTouchX = 0;
+        
+        // Heart animation control
+        let heartsStarted = false;
+        let heartInterval = null;
         
         // DOM elements
         const blocksLeftEl = document.getElementById('blocksLeft');
@@ -407,23 +347,29 @@
         
         // Initialize game
         function initGame() {
+            resizeCanvas();
+            
             // Set sizes based on canvas
             ballRadius = Math.max(8, canvas.width * 0.02);
-            paddleHeight = ballRadius * 1.5;
-            paddleWidth = canvas.width * 0.25;
+            paddleHeight = ballRadius * 1.2;
+            paddleWidth = canvas.width * 0.2;
             
             // Initialize positions
             paddleX = (canvas.width - paddleWidth) / 2;
             paddleY = canvas.height - paddleHeight - 30;
             
+            // Beginner friendly speed
             ballX = canvas.width / 2;
             ballY = canvas.height - paddleHeight - 40;
+            ballSpeedX = 2.5;
+            ballSpeedY = -2.5;
             
-            // Initialize blocks
+            // Initialize blocks with black & white theme
             blockWidth = (canvas.width - 40) / blockCols - blockPadding;
             blockHeight = Math.min(22, blockWidth * 0.5);
             
             blocks = [];
+            // Black, white, and gray colors only
             const blockColors = ['#333', '#555', '#777', '#999', '#bbb', '#ddd'];
             
             for (let r = 0; r < blockRows; r++) {
@@ -448,40 +394,97 @@
             draw();
         }
         
-        // Update game sizes after resize
-        function updateGameSizes() {
-            ballRadius = Math.max(8, canvas.width * 0.02);
-            paddleHeight = ballRadius * 1.5;
-            paddleWidth = canvas.width * 0.25;
-            
-            // Recalculate block sizes
-            blockWidth = (canvas.width - 40) / blockCols - blockPadding;
-            blockHeight = Math.min(22, blockWidth * 0.5);
-            
-            // Update block positions
-            for (let r = 0; r < blockRows; r++) {
-                for (let c = 0; c < blockCols; c++) {
-                    if (blocks[r] && blocks[r][c]) {
-                        blocks[r][c].x = c * (blockWidth + blockPadding) + 20;
-                        blocks[r][c].y = r * (blockHeight + blockPadding) + blockOffsetTop;
-                        blocks[r][c].width = blockWidth;
-                        blocks[r][c].height = blockHeight;
-                    }
+        // Create heart particles - NOW WITH DELAY
+        function createHeartParticles(count, delay = 0) {
+            setTimeout(() => {
+                for (let i = 0; i < count; i++) {
+                    setTimeout(() => {
+                        const heart = document.createElement('div');
+                        heart.className = 'heart';
+                        
+                        // Random starting position at bottom
+                        const startX = Math.random() * 100;
+                        heart.style.left = startX + 'vw';
+                        heart.style.top = '100vh';
+                        
+                        valentineOverlay.appendChild(heart);
+                        
+                        // Random size
+                        const size = Math.random() * 15 + 10;
+                        heart.style.width = size + 'px';
+                        heart.style.height = size + 'px';
+                        
+                        // Random color variation
+                        const hue = 340 + Math.random() * 20;
+                        heart.style.background = `hsl(${hue}, 100%, 65%)`;
+                        heart.style.borderRadius = '0';
+                        
+                        // Apply color to pseudo-elements
+                        const style = document.createElement('style');
+                        style.innerHTML = `
+                            .heart[data-id="${Date.now() + i}"]:before,
+                            .heart[data-id="${Date.now() + i}"]:after {
+                                background: hsl(${hue}, 100%, 65%);
+                            }
+                        `;
+                        heart.setAttribute('data-id', Date.now() + i);
+                        document.head.appendChild(style);
+                        
+                        // Animate upward
+                        const duration = 3000 + Math.random() * 2000;
+                        const height = window.innerHeight + 100;
+                        
+                        heart.animate([
+                            { 
+                                transform: 'translateY(0) rotate(45deg) scale(0.5)', 
+                                opacity: 0 
+                            },
+                            { 
+                                transform: 'translateY(-20px) rotate(45deg) scale(1)', 
+                                opacity: 0.8 
+                            },
+                            { 
+                                transform: `translateY(-${height}px) rotate(45deg) scale(0.5)`, 
+                                opacity: 0 
+                            }
+                        ], {
+                            duration: duration,
+                            easing: 'cubic-bezier(0.215, 0.61, 0.355, 1)'
+                        });
+                        
+                        // Remove after animation
+                        setTimeout(() => {
+                            if (heart.parentNode) {
+                                heart.remove();
+                            }
+                            if (style.parentNode) {
+                                style.remove();
+                            }
+                        }, duration + 1000);
+                    }, i * 200);
                 }
-            }
-            
-            // Keep paddle within bounds
-            paddleX = Math.min(Math.max(0, paddleX), canvas.width - paddleWidth);
-            paddleY = canvas.height - paddleHeight - 30;
-            
-            draw();
+            }, delay * 1000);
         }
         
-        // Draw functions
+        // Start delayed hearts
+        function startHeartAnimation() {
+            if (heartsStarted) return;
+            heartsStarted = true;
+            
+            // Initial burst after 2 seconds
+            createHeartParticles(8, 0);
+            
+            // Continuous hearts
+            heartInterval = setInterval(() => {
+                createHeartParticles(2, 0);
+            }, 1500);
+        }
+        
+        // Draw red ball
         function drawBall() {
             ctx.beginPath();
             ctx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
-            ctx.fillStyle = '#ff4444';
+            ctx.fillStyle = '#ff4444'; // Red ball
             ctx.fill();
             ctx.closePath();
             
@@ -493,55 +496,77 @@
             ctx.closePath();
         }
         
+        // Draw black paddle
         function drawPaddle() {
             ctx.beginPath();
-            ctx.roundRect(paddleX, paddleY, paddleWidth, paddleHeight, 8);
-            ctx.fillStyle = '#333';
+            ctx.roundRect(paddleX, paddleY, paddleWidth, paddleHeight, 6);
+            ctx.fillStyle = '#333'; // Black paddle
             ctx.fill();
             ctx.closePath();
             
             // Paddle highlight
             ctx.beginPath();
-            ctx.roundRect(paddleX + 3, paddleY + 2, paddleWidth - 6, paddleHeight/2, 4);
+            ctx.roundRect(paddleX + 2, paddleY + 2, paddleWidth - 4, paddleHeight/2, 4);
             ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
             ctx.fill();
             ctx.closePath();
         }
         
+        // Draw black & white blocks
         function drawBlocks() {
             for (let r = 0; r < blockRows; r++) {
                 for (let c = 0; c < blockCols; c++) {
                     const block = blocks[r][c];
                     if (block.active) {
+                        // Block
                         ctx.beginPath();
-                        ctx.roundRect(block.x, block.y, block.width, block.height, 4);
+                        ctx.roundRect(block.x, block.y, block.width, block.height, 3);
                         ctx.fillStyle = block.color;
                         ctx.fill();
                         ctx.closePath();
                         
+                        // Block border
                         ctx.beginPath();
-                        ctx.roundRect(block.x, block.y, block.width, block.height, 4);
+                        ctx.roundRect(block.x, block.y, block.width, block.height, 3);
                         ctx.strokeStyle = '#ddd';
                         ctx.lineWidth = 1;
                         ctx.stroke();
                         ctx.closePath();
+                        
+                        // Block pattern (subtle)
+                        ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+                        ctx.fillRect(
+                            block.x + 2,
+                            block.y + 2,
+                            block.width - 4,
+                            2
+                        );
                     }
                 }
             }
         }
         
+        // Draw everything
         function draw() {
             // Clear with white
             ctx.fillStyle = '#fff';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // Draw subtle background grid
+            drawBlocks();
+            drawBall();
+            drawPaddle();
+            
+            // Draw subtle grid
+            drawGrid();
+        }
+        
+        // Draw subtle grid
+        function drawGrid() {
             ctx.strokeStyle = 'rgba(0, 0, 0, 0.05)';
             ctx.lineWidth = 1;
             
             // Vertical lines
-            const gridSize = 50;
-            for (let x = gridSize; x < canvas.width; x += gridSize) {
+            for (let x = 0; x < canvas.width; x += 50) {
                 ctx.beginPath();
                 ctx.moveTo(x, 0);
                 ctx.lineTo(x, canvas.height);
@@ -549,16 +574,12 @@
             }
             
             // Horizontal lines
-            for (let y = gridSize; y < canvas.height; y += gridSize) {
+            for (let y = 0; y < canvas.height; y += 50) {
                 ctx.beginPath();
                 ctx.moveTo(0, y);
                 ctx.lineTo(canvas.width, y);
                 ctx.stroke();
             }
-            
-            drawBlocks();
-            drawBall();
-            drawPaddle();
         }
         
         // Collision detection
@@ -579,7 +600,7 @@
                 ballX < paddleX + paddleWidth) {
                 
                 const hitPos = (ballX - paddleX) / paddleWidth;
-                ballSpeedX = 5 * (hitPos - 0.5);
+                ballSpeedX = 4 * (hitPos - 0.5);
                 ballSpeedY = -Math.abs(ballSpeedY);
             }
             
@@ -602,6 +623,7 @@
                         blocksLeftEl.textContent = blocksLeft;
                         scoreEl.textContent = score;
                         
+                        // Check if all blocks are broken
                         if (blocksLeft === 0) {
                             gameComplete();
                             return;
@@ -643,16 +665,17 @@
             initGame();
             gameLoop();
             
-            // Hide controls hint after 3 seconds
+            // Hide controls hint after 5 seconds
             setTimeout(() => {
                 controlsHint.style.opacity = '0.5';
-            }, 3000);
+            }, 5000);
         }
         
         // Game over
         function gameOver() {
             gameRunning = false;
             
+            // Show controls hint again
             controlsHint.style.opacity = '1';
             
             setTimeout(() => {
@@ -661,21 +684,33 @@
             }, 1000);
         }
         
-        // Game complete
+        // Game complete - show Valentine's surprise
         function gameComplete() {
             gameRunning = false;
             
+            // Hide controls hint
             controlsHint.style.opacity = '0';
             
+            // Reset heart animation state
+            heartsStarted = false;
+            if (heartInterval) {
+                clearInterval(heartInterval);
+                heartInterval = null;
+            }
+            
+            // Wait a moment, then show Valentine's overlay
             setTimeout(() => {
                 valentineOverlay.style.display = 'flex';
                 setTimeout(() => {
                     valentineOverlay.style.opacity = '1';
+                    
+                    // Start heart animation after 2 seconds (DELAYED)
+                    setTimeout(startHeartAnimation, 1000);
                 }, 100);
             }, 800);
         }
         
-        // TOUCH CONTROLS - SIMPLIFIED
+        // Touch controls
         canvas.addEventListener('touchstart', (e) => {
             e.preventDefault();
             
@@ -684,66 +719,53 @@
                 return;
             }
             
-            isTouching = true;
             const touch = e.touches[0];
-            const rect = canvas.getBoundingClientRect();
-            lastTouchX = touch.clientX - rect.left;
+            touchStartX = touch.clientX;
+            paddleStartX = paddleX;
+            isTouching = true;
         });
         
         canvas.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-            
             if (!gameRunning || !isTouching) return;
             
+            e.preventDefault();
             const touch = e.touches[0];
-            const rect = canvas.getBoundingClientRect();
-            const touchX = touch.clientX - rect.left;
+            const deltaX = touch.clientX - touchStartX;
             
-            // Calculate movement
-            const deltaX = touchX - lastTouchX;
-            paddleX += deltaX * 1.5; // Add multiplier for sensitivity
+            paddleX = paddleStartX + deltaX;
             
-            // Keep paddle within bounds
             if (paddleX < 0) paddleX = 0;
             if (paddleX + paddleWidth > canvas.width) {
                 paddleX = canvas.width - paddleWidth;
             }
-            
-            lastTouchX = touchX;
         });
         
-        canvas.addEventListener('touchend', (e) => {
-            e.preventDefault();
+        canvas.addEventListener('touchend', () => {
             isTouching = false;
         });
         
-        // MOUSE CONTROLS
+        // Mouse controls
         canvas.addEventListener('mousedown', (e) => {
             if (!gameRunning) {
                 startGame();
                 return;
             }
             
+            touchStartX = e.clientX;
+            paddleStartX = paddleX;
             isTouching = true;
-            const rect = canvas.getBoundingClientRect();
-            lastTouchX = e.clientX - rect.left;
         });
         
         canvas.addEventListener('mousemove', (e) => {
             if (!gameRunning || !isTouching) return;
             
-            const rect = canvas.getBoundingClientRect();
-            const mouseX = e.clientX - rect.left;
-            
-            const deltaX = mouseX - lastTouchX;
-            paddleX += deltaX;
+            const deltaX = e.clientX - touchStartX;
+            paddleX = paddleStartX + deltaX;
             
             if (paddleX < 0) paddleX = 0;
             if (paddleX + paddleWidth > canvas.width) {
                 paddleX = canvas.width - paddleWidth;
             }
-            
-            lastTouchX = mouseX;
         });
         
         canvas.addEventListener('mouseup', () => {
@@ -754,24 +776,44 @@
             isTouching = false;
         });
         
-        // KEYBOARD CONTROLS
+        // Keyboard controls (optional for desktop)
         document.addEventListener('keydown', (e) => {
             if (!gameRunning) return;
             
-            if (e.key === 'ArrowLeft' || e.key === 'a') {
-                paddleX = Math.max(0, paddleX - 20);
-            } else if (e.key === 'ArrowRight' || e.key === 'd') {
-                paddleX = Math.min(canvas.width - paddleWidth, paddleX + 20);
+            if (e.key === 'ArrowLeft' || e.key === 'Left') {
+                paddleX = Math.max(0, paddleX - 10);
+            } else if (e.key === 'ArrowRight' || e.key === 'Right') {
+                paddleX = Math.min(canvas.width - paddleWidth, paddleX + 10);
             }
         });
         
         // Event Listeners
         startBtn.addEventListener('click', startGame);
         
-        // Handle resize and orientation change
-        window.addEventListener('resize', resizeCanvas);
-        window.addEventListener('orientationchange', () => {
-            setTimeout(resizeCanvas, 150);
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+            if (gameRunning) {
+                paddleWidth = canvas.width * 0.2;
+                paddleX = Math.min(paddleX, canvas.width - paddleWidth);
+                paddleY = canvas.height - paddleHeight - 30;
+                
+                blockWidth = (canvas.width - 40) / blockCols - blockPadding;
+                blockHeight = Math.min(22, blockWidth * 0.5);
+                
+                for (let r = 0; r < blockRows; r++) {
+                    for (let c = 0; c < blockCols; c++) {
+                        if (blocks[r] && blocks[r][c]) {
+                            blocks[r][c].x = c * (blockWidth + blockPadding) + 20;
+                            blocks[r][c].y = r * (blockHeight + blockPadding) + blockOffsetTop;
+                            blocks[r][c].width = blockWidth;
+                            blocks[r][c].height = blockHeight;
+                        }
+                    }
+                }
+                
+                draw();
+            }
         });
         
         // Add roundedRect to CanvasRenderingContext2D
@@ -791,16 +833,15 @@
         // Initialize on load
         window.addEventListener('load', () => {
             resizeCanvas();
-            // Force a resize after a short delay to ensure proper sizing
-            setTimeout(resizeCanvas, 100);
+            initGame();
         });
         
-        // Also resize when page becomes visible again (for mobile)
-        document.addEventListener('visibilitychange', () => {
-            if (!document.hidden) {
-                setTimeout(resizeCanvas, 100);
+        // Prevent pull-to-refresh
+        document.addEventListener('touchmove', (e) => {
+            if (gameRunning) {
+                e.preventDefault();
             }
-        });
+        }, { passive: false });
     </script>
 </body>
 </html>
