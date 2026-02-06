@@ -288,7 +288,7 @@
         
         <div class="valentine-overlay" id="valentineOverlay">
             <div class="valentine-card">
-                <img src="images/qt_cat.gif" alt="Funny cat" class="valentine-gif" />
+                <img src="images/qt_cat.gif" alt="Cute cat" class="valentine-gif" />
                 <div class="question">
                     Will you be my Valentine?
                 </div>
@@ -331,10 +331,11 @@
         let blockOffsetTop = 80;
         let blocks = [];
         
-        // Touch tracking
+        // Touch tracking - FOR SWIPE/DRAG
         let touchStartX = 0;
         let paddleStartX = 0;
         let isTouching = false;
+        let lastTouchX = 0;
         
         // Heart animation control
         let heartsStarted = false;
@@ -713,7 +714,7 @@
             }, 800);
         }
         
-        // Touch controls - SIMPLIFIED FIX (DIFFERENT METHOD)
+        // Touch controls - SWIPE/DRAG METHOD (FIXED)
         canvas.addEventListener('touchstart', (e) => {
             e.preventDefault();
             
@@ -724,26 +725,21 @@
             
             const touch = e.touches[0];
             const rect = canvas.getBoundingClientRect();
-            // FIX: Direct paddle position to touch (centered)
-            const touchX = touch.clientX - rect.left;
-            paddleX = touchX - (paddleWidth / 2);
-            
-            if (paddleX < 0) paddleX = 0;
-            if (paddleX + paddleWidth > canvas.width) {
-                paddleX = canvas.width - paddleWidth;
-            }
+            touchStartX = touch.clientX - rect.left;
+            paddleStartX = paddleX;
+            isTouching = true;
         });
         
         canvas.addEventListener('touchmove', (e) => {
+            if (!gameRunning || !isTouching) return;
+            
             e.preventDefault();
-            
-            if (!gameRunning) return;
-            
             const touch = e.touches[0];
             const rect = canvas.getBoundingClientRect();
-            // FIX: Direct paddle position to touch (centered)
-            const touchX = touch.clientX - rect.left;
-            paddleX = touchX - (paddleWidth / 2);
+            const currentTouchX = touch.clientX - rect.left;
+            const deltaX = currentTouchX - touchStartX;
+            
+            paddleX = paddleStartX + deltaX;
             
             if (paddleX < 0) paddleX = 0;
             if (paddleX + paddleWidth > canvas.width) {
@@ -753,9 +749,15 @@
         
         canvas.addEventListener('touchend', (e) => {
             e.preventDefault();
+            isTouching = false;
         });
         
-        // Mouse controls - SIMPLIFIED FIX (SAME METHOD)
+        canvas.addEventListener('touchcancel', (e) => {
+            e.preventDefault();
+            isTouching = false;
+        });
+        
+        // Mouse controls - DRAG METHOD
         canvas.addEventListener('mousedown', (e) => {
             if (!gameRunning) {
                 startGame();
@@ -763,21 +765,19 @@
             }
             
             const rect = canvas.getBoundingClientRect();
-            const mouseX = e.clientX - rect.left;
-            paddleX = mouseX - (paddleWidth / 2);
-            
-            if (paddleX < 0) paddleX = 0;
-            if (paddleX + paddleWidth > canvas.width) {
-                paddleX = canvas.width - paddleWidth;
-            }
+            touchStartX = e.clientX - rect.left;
+            paddleStartX = paddleX;
+            isTouching = true;
         });
         
         canvas.addEventListener('mousemove', (e) => {
-            if (!gameRunning) return;
+            if (!gameRunning || !isTouching) return;
             
             const rect = canvas.getBoundingClientRect();
-            const mouseX = e.clientX - rect.left;
-            paddleX = mouseX - (paddleWidth / 2);
+            const currentMouseX = e.clientX - rect.left;
+            const deltaX = currentMouseX - touchStartX;
+            
+            paddleX = paddleStartX + deltaX;
             
             if (paddleX < 0) paddleX = 0;
             if (paddleX + paddleWidth > canvas.width) {
@@ -786,11 +786,11 @@
         });
         
         canvas.addEventListener('mouseup', () => {
-            // Nothing needed here
+            isTouching = false;
         });
         
         canvas.addEventListener('mouseleave', () => {
-            // Nothing needed here
+            isTouching = false;
         });
         
         // Keyboard controls (optional for desktop)
